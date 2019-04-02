@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    <template id="stock.report_inventory">
+       
+<t t-name="stock.report_inventory">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2>Stock Inventory</h2>
+
+                            <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th><strong>Inventory</strong></th>
+                                    <th><strong>Date</strong></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <span t-field="o.name"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.date"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            </table>
+
+                            <t t-set="locations" t-value="o.line_ids.mapped('location_id')"/>
+                            <t t-set="theoretical_qty_var" t-value="0"/>
+                            <t t-set="product_qty_var" t-value="0"/>
+                            <t t-set="produqt_qty_minus_theoretical_qty_var" t-value="0"/>
+                            <t t-set="more_hard_produqt_qty_minus_theoretical_qty_var" t-value="0"/>
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th groups="stock.group_stock_multi_locations"><strong>Location</strong></th>
+                                        <th><strong>Product</strong></th>
+                                        <th groups="stock.group_production_lot"><strong>Production Lot</strong></th>
+                                        <th groups="stock.group_tracking_lot"><strong>Package</strong></th>
+                                        <th class="text-left"><strong>Theoretical Quantity</strong></th>
+                                        <th class="text-right"><strong>Quantity</strong></th>
+                                        <th class="text-right"><strong>Difference</strong></th>
+                                        <th class="text-right"><strong>Difference in ₴</strong></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="locations" t-as="location">
+                                        <tr groups="stock.group_stock_multi_locations">
+                                            <td colspan="2"><strong t-esc="location.display_name"/></td>
+                                            <td groups="stock.group_production_lot"/>
+                                            <td groups="stock.group_tracking_lot"/>
+                                            <td/>
+                                        </tr>
+                                        <tr t-foreach="o.line_ids.filtered(lambda line: line.location_id.id == location.id)" t-as="line">
+                                            <td groups="stock.group_stock_multi_locations"/>
+                                            <td><span t-field="line.product_id"/></td>
+                                            <td groups="stock.group_production_lot"><span t-field="line.prod_lot_id"/></td>
+                                            <td groups="stock.group_tracking_lot"><span t-field="line.package_id"/></td>
+                                            <td class="text-left"><span t-field="line.theoretical_qty"/><t t-set="theoretical_qty_var" t-value="theoretical_qty_var+line.theoretical_qty"/> <span t-field="line.product_uom_id" groups="uom.group_uom"/></td>
+                                            <td class="text-right"><span t-field="line.product_qty"/><t t-set="product_qty_var" t-value="product_qty_var+line.product_qty"/> <span t-field="line.product_uom_id" groups="uom.group_uom"/></td>
+                                            <td class="text-right"><span t-esc="round((line.product_qty - line.theoretical_qty)*1000)/1000"/><t t-set="produqt_qty_minus_theoretical_qty_var" t-value="produqt_qty_minus_theoretical_qty_var+round((line.product_qty - line.theoretical_qty)*1000)/1000"/> <span t-field="line.product_uom_id" groups="uom.group_uom"/></td>
+                                            <td class="text-right"><span t-esc="round((line.product_qty*line.product_id.lst_price - line.theoretical_qty*line.product_id.lst_price)*100)/100"/> ₴<t t-set="more_hard_produqt_qty_minus_theoretical_qty_var" t-value="more_hard_produqt_qty_minus_theoretical_qty_var+round((line.product_qty*line.product_id.lst_price - line.theoretical_qty*line.product_id.lst_price)*100)/100"/></td>
+                                        </tr>
+                                        
+                                        
+                                    </t>
+                                    <tr>
+                                            
+                                            <td>Всього:</td>
+                                            <td></td>
+                                            <td class="text-left"><span t-esc="round((theoretical_qty_var)*100)/100"/></td>
+                                            <td class="text-right"><span t-esc="round((product_qty_var)*100)/100"/></td>
+                                            <td class="text-right"><span t-esc="round((produqt_qty_minus_theoretical_qty_var)*1000)/1000"/></td>
+                                            <td class="text-right"><span t-esc="round((more_hard_produqt_qty_minus_theoretical_qty_var)*100)/100"/></td>
+                                        </tr>
+                                </tbody>
+                            </table>
+
+                            <t t-if="o.filter == 'product' and o.product_id">
+                              <div class="row justify-content-end">
+                                <div class="col-4">
+                                     <table class="table table-sm">
+                                        <tr class="border-black">
+                                            <td><strong>Total Quantity</strong></td>
+                                            <td class="text-right">
+                                                <span t-field="o.total_qty"/> <span t-field="o.product_id.uom_id"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                              </div>
+                            </t>
+                        </div>
+                    </t>
+                 </t>
+             </t>
+        </t>
+    	   </template>
+</data>
+</odoo>
